@@ -4,7 +4,7 @@
 #include "randlib.h"
 #include "typeutil.h"
 
-void fir_lowpass_filter(uint8_t **img, double **output, double **kernel, int i, int j, 
+void filter(uint8_t **img, double **output, double **kernel, int i, int j, 
                         int width, int height, int kernel_size);
 
 void apply_color(struct TIFF_img output, double **input, int channel);
@@ -12,14 +12,13 @@ void apply_color(struct TIFF_img output, double **input, int channel);
 int main (int argc, char **argv)
 {
   FILE *fp;
-  struct TIFF_img input_img, filter_img;
+  struct TIFF_img input_img, filter_img, psf_img;
   double **output;
-  int kernel_size = 9;
   double **kernel;
   int32_t i, j;
-
+  
   // check for argument count
-  if ( argc != 2 ) {
+  if ( argc != 3 ) {
     fprintf( stderr, "Missing Argument\n");
     exit(1);
   }
@@ -43,15 +42,27 @@ int main (int argc, char **argv)
     exit ( 1 );
   }
 
+  if ((fp = fopen(argv[2], "rb")) == NULL) {
+    fprintf ( stderr, "cannot open file %s\n", argv[2] );
+    exit ( 1 );
+  }
+
+  if (read_TIFF(fp, &psf_img)) {
+    fprintf( stderr, "error reading file %s\n", argv[2] );
+    exit(1);
+  }
+
+  fclose(fp);
+
   //allocate memory
   output = (double **)get_img(input_img.width, input_img.height, sizeof(double));
-  kernel = (double **)get_img(kernel_size, kernel_size, sizeof(double));
+  kernel = (double **)get_img(psf_img.width, psf_img.height, sizeof(double));
 
-  //create kernel
+  //covert tif to kernel
   printf("Create Kernel\n");
-  for (i = 0; i < kernel_size; i++) {
-    for (j = 0; j < kernel_size; j++) {
-      kernel[i][j] = 1.0 / 81.0;
+  for (i = 0; i < psf_img.width; i++) {
+    for (j = 0; j < psf_img.width; j++) {
+      kernel[i][j] = psf_img.mono[i][j] / 255.0;
     }
   }
 
@@ -62,8 +73,8 @@ int main (int argc, char **argv)
   for (int c = 0; c < 3; c++){
     for (i = 0; i < input_img.height; i++) {
       for (j = 0; j < input_img.width; j++) {
-        fir_lowpass_filter(input_img.color[c], output, kernel, i, j, 
-                          input_img.width, input_img.height, kernel_size);
+        filter(input_img.color[c], output, kernel, i, j, 
+                          input_img.width, input_img.height, psf_img.width);
       }
     }
     printf("Channel %d complete\n", c);
@@ -72,7 +83,8 @@ int main (int argc, char **argv)
   }
 
   /* open image file for write */
-  if ( ( fp = fopen ( "lowpass_filter.tif", "wb" ) ) == NULL ) {
+  
+  if ( ( fp = fopen ( "iir_filter.tif", "wb" ) ) == NULL ) {
     fprintf ( stderr, "cannot open file lowpass_filter.tif\n");
     exit ( 1 );
   }
@@ -89,11 +101,12 @@ int main (int argc, char **argv)
   /* de-allocate memory */
   free_TIFF(&(input_img));
   free_TIFF(&(filter_img));
+  free_TIFF(&(psf_img));
   free_img((void**)output);
   free_img((void**)kernel);
 }
 
-void fir_lowpass_filter(uint8_t **img, double **output, double **kernel, int i, int j, 
+void filter(uint8_t **img, double **output, double **kernel, int i, int j, 
                         int width, int height, int kernel_size) 
 {
   double sum = 0.0;

@@ -104,6 +104,7 @@ int main (int argc, char **argv)
   free_TIFF(&(input_img));
   free_TIFF(&(filter_img));
   free_img((void**)output);
+  free_img((void**)kernel);
 }
 
 void fir_filter(uint8_t **img, double **output, double **kernel, int i, int j, 

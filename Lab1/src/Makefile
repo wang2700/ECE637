@@ -3,7 +3,7 @@ CC = gcc
 CFLAGS = -std=c99 -Wall -pedantic
 BIN = ../bin
 
-all: ImageReadWriteExample SurrogateFunctionExample LowPassFilter SharpeningFilter
+all: ImageReadWriteExample SurrogateFunctionExample LowPassFilter SharpeningFilter IIR_Filter
 
 clean:
 	/bin/rm *.o $(BIN)/*
@@ -25,3 +25,7 @@ LowPassFilter: LowPassFilter.o $(OBJ)
 SharpeningFilter: SharpeningFilter.o $(OBJ) 
 	$(CC) $(CFLAGS) -o SharpeningFilter SharpeningFilter.o $(OBJ) -lm
 	mv SharpeningFilter $(BIN)
+
+IIR_Filter: IIR_Filter.o $(OBJ) 
+	$(CC) $(CFLAGS) -o IIR_Filter IIR_Filter.o $(OBJ) -lm
+	mv IIR_Filter $(BIN)
