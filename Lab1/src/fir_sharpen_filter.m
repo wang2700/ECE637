@@ -7,8 +7,8 @@ f1 = f1 * pi;
 f2 = f2 * pi;
 mesh(f1, f2, abs(H))
 axis ([-pi pi -pi pi 0 1])
-xlabel('f_1 (rad)')
-ylabel('f_2 (rad)')
+xlabel('u')
+ylabel('v')
 zlabel('magnitude')
 title('Frequency Response of FIR Low Pass Filter')
 
@@ -22,7 +22,7 @@ f1 = f1 * pi;
 f2 = f2 * pi;
 mesh(f1, f2, abs(G))
 axis ([-pi pi -pi pi 1 3])
-xlabel('f_1 (rad)')
-ylabel('f_2 (rad)')
+xlabel('u')
+ylabel('v')
 zlabel('magnitude')
 title('Frequency Response of FIR Sharpening Filter')
