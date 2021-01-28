@@ -38,4 +38,4 @@ for i = 1:256
 end
 imshow(uint8(255*100*h))
 imwrite(uint8(255*100*h), 'h_out.png');
-imwrite(uint8(255*100*h), 'h_out.tif');
+imwrite(uint8(255*100*h), 'h_out.tif', 'tif', 'Compression', 'none');
