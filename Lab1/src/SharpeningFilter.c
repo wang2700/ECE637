@@ -131,6 +131,9 @@ void apply_color(struct TIFF_img output, double **input, int channel)
       if (pixel > 255) {
         pixel = 255;
       }
+      if (pixel < 0) {
+        pixel = 0;
+      }
       output.color[channel][i][j] = (int32_t)input[i][j];
     }
   }
