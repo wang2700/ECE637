@@ -4,8 +4,7 @@
 #include "randlib.h"
 #include "typeutil.h"
 
-void filter(uint8_t **img, double **output, double **kernel, int i, int j, 
-                        int width, int height, int kernel_size);
+void iir_filter(uint8_t **img, double **output, int i, int j, int width, int height);
 
 void apply_color(struct TIFF_img output, double **input, int channel);
 
@@ -62,7 +61,7 @@ int main (int argc, char **argv)
   printf("Create Kernel\n");
   for (i = 0; i < psf_img.width; i++) {
     for (j = 0; j < psf_img.width; j++) {
-      kernel[i][j] = psf_img.mono[i][j] / 255.0;
+      kernel[i][j] = psf_img.mono[i][j] / 255.0 / 100.0;
     }
   }
 
@@ -73,8 +72,8 @@ int main (int argc, char **argv)
   for (int c = 0; c < 3; c++){
     for (i = 0; i < input_img.height; i++) {
       for (j = 0; j < input_img.width; j++) {
-        filter(input_img.color[c], output, kernel, i, j, 
-                          input_img.width, input_img.height, psf_img.width);
+        iir_filter(input_img.color[c], output, i, j, 
+                    input_img.width, input_img.height);
       }
     }
     printf("Channel %d complete\n", c);
@@ -106,18 +105,18 @@ int main (int argc, char **argv)
   free_img((void**)kernel);
 }
 
-void filter(uint8_t **img, double **output, double **kernel, int i, int j, 
-                        int width, int height, int kernel_size) 
+void iir_filter(uint8_t **img, double **output, int i, int j, int width, int height) 
 {
   double sum = 0.0;
-  for (int k = 0; k < kernel_size; k++) {
-    for (int l = 0; l < kernel_size; l++) {
-      int loc_i = i + k - kernel_size / 2;
-      int loc_j = j + l - kernel_size / 2;
-      if (loc_i >= 0 && loc_i < height && loc_j >= 0 && loc_j < width) {
-        sum += kernel[k][l] * img[loc_i][loc_j];
-      }
-    }
+  sum = 0.01 * img[i][j];
+  if (i - 1 >= 0) {
+    sum += 0.9 * output[i-1][j];
+  }
+  if (j - 1 >= 0) {
+    sum += 0.9 * output[i][j-1];
+  }
+  if (i - 1 >= 0 && j - 1 >= 0) {
+    sum -= 0.81 * output[i-1][j-1];
   }
   output[i][j] = sum;
 }
