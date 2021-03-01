@@ -2,5 +2,6 @@
     "python.pythonPath": "/home/jerry/anaconda3/envs/ECE637/bin/python",
     "files.associations": {
         "typeutil.h": "c"
-    }
+    },
+    "jupyter.jupyterServerType": "local"
 }
