@@ -3,5 +3,9 @@
     "files.associations": {
         "typeutil.h": "c"
     },
-    "jupyter.jupyterServerType": "local"
+    "jupyter.jupyterServerType": "local",
+    "python.analysis.extraPaths":[
+        "./Lab5/training_data",
+        "./Lab5"
+    ]
 }
