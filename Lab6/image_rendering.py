@@ -15,7 +15,7 @@ y0 = data['y']
 z0 = data['z']
 
 # %% Calculate XYZ tristimulus values
-option = 2
+option = 1
 I = np.zeros_like(R)
 filename = None
 if option == 1:
@@ -48,7 +48,7 @@ RGB[RGB < 0] = 0
 RGB[RGB > 1] = 1
 gamma = 1.8
 img = (RGB * 255)
-img = (255 * np.power(img / 255.0, np.ones_like(img) * gamma)).astype(np.uint8)
+img = (255 * np.power(img / 255.0, np.ones_like(img) / gamma)).astype(np.uint8)
 plt.figure()
 plt.imshow(img)
 im_save = Image.fromarray(img)
