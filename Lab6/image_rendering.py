@@ -39,7 +39,7 @@ wp_d65 = np.array([0.3127, 0.3290, 0.3583])
 weight_709_d65 = np.dot(np.linalg.inv(chromaticity_709), np.array([[wp_d65[0]/wp_d65[1]], [1], [wp_d65[2]/wp_d65[1]]]))
 M_709_d65 = np.dot(chromaticity_709, np.diag(weight_709_d65.reshape((3,))))
 print("Transform Matrix from D65 illumination to Rec 709 RGB")
-print(M_709_d65)
+print(np.linalg.inv(M_709_d65))
 RGB = np.zeros_like(XYZ)
 for i in range(XYZ.shape[0]):
     for j in range(XYZ.shape[1]):
@@ -53,3 +53,4 @@ plt.figure()
 plt.imshow(img)
 im_save = Image.fromarray(img)
 im_save.save('/home/jerry/Documents/Github/ECE637/Lab6/' + filename, 'png')
+# %%
