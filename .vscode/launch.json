@@ -5,6 +5,26 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "(gdb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/jerry/Documents/Github/ECE637/Lab7/bin/weightedMedian",
+            "args": ["/home/jerry/Documents/Github/ECE637/Lab7/input/img14bl.tif"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+
+        {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",

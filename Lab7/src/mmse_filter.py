@@ -5,7 +5,7 @@ from matplotlib import cm
 from PIL import Image
 
 # %% Import Image
-path = '/home/jerry/Documents/Github/ECE637/Lab7/'
+path = '/home/jerry/Documents/Github/ECE637/Lab7/input/'
 im = Image.open(path + 'img14bl.tif')
 img_bl = np.array(im)
 im = Image.open(path + 'img14g.tif')
@@ -43,8 +43,8 @@ def mmse_filter(img_ori, img):
     Z_ind = 0
     for i in range(3, height, 20):
         for j in range(3, width, 20):
-            Z[Z_ind, :] = img[i-window_size//2:i+window_size//2 +
-                              1, j-window_size//2:j+window_size//2+1].reshape((-1,))
+            Z[Z_ind, :] = img[i-window_size//2:i+window_size//2 + 1,
+                              j-window_size//2:j+window_size//2+1].reshape((-1,))
             Z_ind += 1
     Rzz = np.dot(Z.T, Z) / N
     rzy = np.dot(Z.T, Y) / N
@@ -56,6 +56,7 @@ def mmse_filter(img_ori, img):
             img_filter[i, j] = apply_filter_at_pixel(img_bl, i, j, theta)
     img_filter[img_filter < 0] = 0
     img_filter[img_filter > 255] = 255
+    print(theta)
     return img_filter.astype(np.uint8)
 
 
@@ -71,7 +72,7 @@ plt.title('Filtered Image of img_gn.tif')
 plt.savefig(path + 'filtered_gn.png')
 plt.figure
 plt.imshow(mmse_filter(img_g, img_sp), cmap=gray)
-plt.title('Filtered Image of img_bl.tif')
+plt.title('Filtered Image of img_sp.tif')
 plt.savefig(path + 'filtered_sp.png')
 
 # %%

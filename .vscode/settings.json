@@ -1,7 +1,10 @@
 {
     "python.pythonPath": "/home/jerry/anaconda3/envs/ECE637/bin/python",
     "files.associations": {
-        "typeutil.h": "c"
+        "typeutil.h": "c",
+        "numeric": "c",
+        "ratio": "c",
+        "*.tcc": "c"
     },
     "jupyter.jupyterServerType": "local",
     "python.analysis.extraPaths":[
