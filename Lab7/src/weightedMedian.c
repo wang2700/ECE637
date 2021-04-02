@@ -61,8 +61,8 @@ int main(int argc, char const *argv[])
   {
     for (int j = 0; j < weight_size; j++)
     {
-      if (i == 1 || i == weight_size - 1 ||
-          j == 1 || j == weight_size - 1)
+      if (i == 0 || i == weight_size - 1 ||
+          j == 0 || j == weight_size - 1)
       {
         weight[i][j] = 1.0;
       }
@@ -128,7 +128,6 @@ uint8_t weightedMeanFilter(uint8_t **img,
       if (loc_i >= 0 && loc_i < height &&
           loc_j >= 0 && loc_j < width)
       {
-
         pixels[k * weight_size + l] = img[loc_i][loc_j];
         weights[k * weight_size + l] = weight[k][l];
         maxPixels++;
@@ -138,6 +137,12 @@ uint8_t weightedMeanFilter(uint8_t **img,
 
   // sort the pixels
   selectionSort(pixels, weights, maxPixels);
+
+  // for (int i = 0; i < maxPixels; i++)
+  // {
+  //   printf("%d,", pixels[i]);
+  // }
+  // printf("\n");
 
   // find the median
   int median_idx;
@@ -170,10 +175,9 @@ void selectionSort(int arr1[], int arr2[], int n)
     {
       if (arr1[j] > arr1[max_idx])
         max_idx = j;
-
-      swap(&arr1[max_idx], &arr1[i]);
-      swap(&arr2[max_idx], &arr2[i]);
     }
+    swap(&arr1[max_idx], &arr1[i]);
+    swap(&arr2[max_idx], &arr2[i]);
   }
 }
 
