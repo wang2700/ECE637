@@ -35,22 +35,19 @@ def apply_filter(img, kernel):
 # %% Fidelity Function
 
 
-def fidelity(f, b, gamma):
-    # gamma correct f
-    f_correct = 255. * np.power(f / 255., gamma)
+def fidelity(f, b):
     # Low pass filter f and b
-    sig_sq = 2
-    kernel = np.zeros((7, 7))
+    kernel = np.zeros((7, 7)).astype(np.float)
     for i in range(7):
         for j in range(7):
-            kernel[i, j] = math.exp(-(i ^ 2 + j ^ 2) / (2 * sig_sq))
-    kernel = kernel / np.mean(kernel)
-    f_filter = apply_filter(f_correct, kernel)
+            kernel[i, j] = math.exp(-(i ^ 2 + j ^ 2) / 4.)
+    kernel = kernel / np.sum(kernel)
+    f_filter = apply_filter(f, kernel)
     b_filter = apply_filter(b, kernel)
     # apply transformation
-    f_filter = np.power(255. * (f_filter / 255.), 1. / 3.)
-    b_filter = np.power(255. * (b_filter / 255.), 1. / 3.)
-    return np.power(np.power(np.sum(f_filter - b_filter), 2) / np.prod(f_filter.shape), 0.5)
+    f_filter = 255. * (f_filter / 255.) ** (1. / 3.)
+    b_filter = 255. * (b_filter / 255.) ** (1. / 3.)
+    return np.sqrt(np.sum(np.power(f_filter - b_filter, 2)) / np.prod(f_filter.shape))
 
 
 # %% Threasholding
@@ -60,9 +57,56 @@ binary_img = np.zeros_like(img)
 binary_img[img > 127] = 255
 img_out = Image.fromarray(binary_img.astype(np.uint8))
 img_out.save(out_path + 'part3_out.tif')
-RSME = np.power(np.power(np.sum(img - binary_img), 2) /
-                np.prod(img.shape), 0.5)
+RSME = np.sqrt(np.sum(np.power(img - binary_img, 2)) / np.prod(img.shape))
 print('RSME: ', RSME)
-fid = fidelity(img, binary_img, 2.2)
+img_correct = 255. * np.power(img / 255., 2.2)
+fid = fidelity(img_correct, binary_img)
 print('fidelity: ', fid)
+
+# %% Bayer threashold matrix
+
+
+def bayer_dither_matrix(n):
+    if (n != 2):
+        In = bayer_dither_matrix(n / 2)
+        return np.block([[4 * In + 1, 4 * In + 2],
+                         [4 * In + 3, 4 * In]])
+    else:
+        return np.array([[1., 2.], [3., 0.]])
+
+
+def bayer_threashold(n):
+    I = bayer_dither_matrix(n)
+    return 255. * (I + 0.5) / (n ** 2)
+
+# %% Apply Ordered Dithering Threashold
+
+
+def apply_ordered_dithering(img, thresh):
+    b = np.zeros_like(img)
+    N = thresh.shape[0]
+    for i in range(img.shape[0]):
+        for j in range(img.shape[1]):
+            if img[i, j] > thresh[i % N, j % N]:
+                b[i, j] = 255
+    return b
+
+
 # %% Ordered Dithering
+out_path = '/home/jerry/Documents/Github/ECE637/Lab8/'
+img_correct = 255. * np.power(img / 255., 2.2)
+n_vec = [2, 4, 8]
+for n in n_vec:
+    print("Matrix Size: ", n)
+    T = bayer_threashold(n)
+    print(T)
+    b = apply_ordered_dithering(img_correct, T)
+    img_out = Image.fromarray(b.astype(np.uint8))
+    img_out.save(out_path + 'part4_' + str(n) + '_out.tif')
+    RSME = np.sqrt(np.sum(np.power(img - b, 2)
+                          ) / np.prod(img_correct.shape))
+    print('RSME: ', RSME)
+    fid = fidelity(img_correct, b)
+    print('fidelity: ', fid)
+
+# %%
