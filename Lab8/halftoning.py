@@ -40,7 +40,7 @@ def fidelity(f, b):
     kernel = np.zeros((7, 7)).astype(np.float)
     for i in range(7):
         for j in range(7):
-            kernel[i, j] = math.exp(-(i ^ 2 + j ^ 2) / 4.)
+            kernel[i, j] = math.exp(-((i-3) ** 2 + (j-3) ** 2) / 4.)
     kernel = kernel / np.sum(kernel)
     f_filter = apply_filter(f, kernel)
     b_filter = apply_filter(b, kernel)
@@ -51,6 +51,7 @@ def fidelity(f, b):
 
 
 # %% Threasholding
+print('Simple Thresholding')
 out_path = '/home/jerry/Documents/Github/ECE637/Lab8/'
 T = 127
 binary_img = np.zeros_like(img)
@@ -93,6 +94,7 @@ def apply_ordered_dithering(img, thresh):
 
 
 # %% Ordered Dithering
+print('Ordered Dithering')
 out_path = '/home/jerry/Documents/Github/ECE637/Lab8/'
 img_correct = 255. * np.power(img / 255., 2.2)
 n_vec = [2, 4, 8]
@@ -109,4 +111,37 @@ for n in n_vec:
     fid = fidelity(img_correct, b)
     print('fidelity: ', fid)
 
+# %% Error Diffusion
+out_path = '/home/jerry/Documents/Github/ECE637/Lab8/'
+T = 127
+img_correct = 255. * np.power(img / 255., 2.2)
+output_img = np.zeros_like(img_correct)
+for i in range(output_img.shape[0]):
+    for j in range(output_img.shape[1]):
+        if (img_correct[i, j] > T):
+            output_img[i, j] = 255.
+        else:
+            output_img[i, j] = 0.
+
+        error = img_correct[i, j] - output_img[i][j]
+        if (j + 1 < img.shape[1]):
+            img_correct[i][j+1] += 7. / 16. * error
+
+        if (i + 1 < img.shape[0] and j + 1 < img.shape[1]):
+            img_correct[i+1][j+1] += error / 16.
+
+        if (i + 1 < img.shape[0]):
+            img_correct[i+1][j] += 5. / 16. * error
+
+        if (i + 1 < img.shape[0] and j - 1 >= 0):
+            img_correct[i+1][j-1] += 3. / 16. * error
+RSME = np.sqrt(np.sum(np.power(img - output_img, 2)
+                      ) / np.prod(img.shape))
+print('Error Diffusion')
+print('RSME: ', RSME)
+img_correct = 255. * np.power(img / 255., 2.2)
+fid = fidelity(img_correct, output_img)
+print('fidelity: ', fid)
+img_out = Image.fromarray(output_img.astype(np.uint8))
+img_out.save(out_path + 'part5_out.tif')
 # %%
